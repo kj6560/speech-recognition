@@ -1,0 +1,40 @@
+{
+  "name": "@keshav/speech-assistant",
+  "version": "1.5.0",
+  "description": "Dependency-free browser speech-assistant library — turns user speech into text, sends it to a server API, and speaks the reply. One script tag, cross-origin, no build.",
+  "private": true,
+  "main": "speech-assistant.js",
+  "module": "dist/speech-assistant.mjs",
+  "unpkg": "https://unpkg.com/@keshav/speech-assistant@1.5.0/speech-assistant.js",
+  "jsdelivr": "https://cdn.jsdelivr.net/npm/@keshav/speech-assistant@1.5.0/speech-assistant.js",
+  "scripts": {
+    "test": "node --test speech-assistant.test.cjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/user/voice-controlled-website.git"
+  },
+  "keywords": [
+    "speech",
+    "assistant",
+    "browser",
+    "web-speech-api",
+    "text-to-speech",
+    "speech-recognition",
+    "voice"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "dist/",
+    "speech-assistant.js",
+    "speech-assistant.test.cjs",
+    "config.js",
+    "index.html",
+    "styles.css",
+    "README.md",
+    "speech-assistant.d.ts"
+  ]
+}
