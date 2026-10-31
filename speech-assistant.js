@@ -736,10 +736,10 @@
             const command = text.toLowerCase();
             this._emit("transcript", { command, transcript: text });
 
-            if (this.options.onCommand || this.options.endpoint) {
+            if (this.options.onCommand) {
                 this._runCommandHandler(command, text);
             } else {
-                this.handleCommand(command);
+                return;
             }
         }
 

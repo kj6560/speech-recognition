@@ -1,11 +1,11 @@
 {
   "name": "@kj6560/speech-assistant",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "description": "Dependency-free browser speech-assistant library — turns user speech into text, sends it to a server API, and speaks the reply. One script tag, cross-origin, no build.",
   "main": "speech-assistant.js",
   "module": "dist/speech-assistant.mjs",
-  "unpkg": "https://unpkg.com/@kj6560/speech-assistant@1.5.0/speech-assistant.js",
-  "jsdelivr": "https://cdn.jsdelivr.net/npm/@kj6560/speech-assistant@1.5.0/speech-assistant.js",
+  "unpkg": "https://unpkg.com/@kj6560/speech-assistant@1.5.1/speech-assistant.js",
+  "jsdelivr": "https://cdn.jsdelivr.net/npm/@kj6560/speech-assistant@1.5.1/speech-assistant.js",
   "scripts": {
     "test": "node --test speech-assistant.test.cjs"
   },
