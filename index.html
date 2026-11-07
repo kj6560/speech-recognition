@@ -28,7 +28,7 @@
             🎤
         </button>
 
-        <button class="start hidden" id="startButton" type="button">
+        <button class="start" id="startButton" type="button">
             🔊 Start Voice Assistant
         </button>
 
@@ -46,6 +46,11 @@
             <div class="label" id="assistantLabel">Assistant</div>
             <p id="assistantText">Welcome! I am ready to help you.</p>
 
+        </section>
+
+        <section class="transcript" aria-live="polite">
+            <div class="label">Executed action</div>
+            <p id="actionResult">Try a command to see the action run here.</p>
         </section>
 
         <div class="commands" id="commands">
@@ -80,7 +85,54 @@
     <script src="speech-assistant.js"></script>
 
     <script>
+        const commandRoutes = [
+            {
+                intent: "dashboard",
+                keywords: ["dashboard"],
+                reply: "Opening your dashboard."
+            },
+            {
+                intent: "customers",
+                keywords: ["customer"],
+                reply: "Sure! Let me show you the customers section."
+            },
+            {
+                intent: "inventory",
+                keywords: ["inventory"],
+                reply: "Opening inventory management."
+            },
+            {
+                intent: "sales-report",
+                keywords: ["sales", "report"],
+                reply: "Opening your sales report."
+            },
+            {
+                intent: "help",
+                keywords: ["help", "what can you do"],
+                reply:
+                    "I can open your dashboard, customers, inventory, or sales report."
+            },
+            {
+                intent: "goodbye",
+                keywords: ["goodbye", "bye"],
+                reply: "Goodbye! Have a great day."
+            }
+        ];
+
         const assistant = new SpeechAssistant({
+            onCommand: ({ command }) => {
+                const route = commandRoutes.find(({ keywords }) =>
+                    keywords.some((keyword) => command.includes(keyword))
+                );
+
+                if (!route) {
+                    return {
+                        reply: `I heard "${command}", but I do not have an action for it yet.`
+                    };
+                }
+
+                return { reply: route.reply, intent: route.intent };
+            },
             config: {
                 title: "👋 Welcome to AI Assistant",
                 description:
@@ -127,7 +179,62 @@
             }
         });
 
-        assistant.start();
+        const status = document.getElementById("status");
+        const userText = document.getElementById("userText");
+        const assistantText = document.getElementById("assistantText");
+        const actionResult = document.getElementById("actionResult");
+        const micButton = document.getElementById("micButton");
+        const startButton = document.getElementById("startButton");
+        const stopButton = document.getElementById("stopButton");
+        const textForm = document.getElementById("textForm");
+        const textInput = document.getElementById("textInput");
+
+        const commandActions = {
+            dashboard: () => showAction("Dashboard opened."),
+            customers: () => showAction("Customers section opened."),
+            inventory: () => showAction("Inventory section opened."),
+            "sales-report": () => showAction("Sales report opened."),
+            help: () => showAction("Help command handled."),
+            goodbye: () => showAction("Goodbye command handled.")
+        };
+
+        function showAction(message) {
+            actionResult.textContent = message;
+        }
+
+        assistant.on("status", ({ message }) => {
+            status.textContent = message;
+        });
+        assistant.on("transcript", ({ transcript }) => {
+            userText.textContent = transcript;
+        });
+        assistant.on("response", ({ message }) => {
+            assistantText.textContent = message;
+        });
+        assistant.on("intent", ({ intent }) => {
+            const action = commandActions[intent];
+            if (action) action();
+        });
+
+        micButton.addEventListener("click", () => assistant.start());
+        startButton.addEventListener("click", () =>
+            assistant.welcome(assistant.getOptions().config.welcomeMessage)
+        );
+        stopButton.addEventListener("click", () => assistant.stop());
+        textForm.addEventListener("submit", (event) => {
+            event.preventDefault();
+            const message = textInput.value.trim();
+            if (!message) return;
+
+            assistant.sendText(message);
+            textInput.value = "";
+        });
+
+        const support = assistant.getSupport();
+        if (!support.canListen) {
+            micButton.disabled = true;
+            status.textContent = support.message;
+        }
     </script>
 
 </body>

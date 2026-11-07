@@ -24,6 +24,23 @@ declare global {
 
 export type { DEFAULT_MESSAGES };
 
+export interface SpeechAssistantCommandResult {
+  reply?: string;
+  message?: string;
+  intent?: string;
+}
+
+export type SpeechAssistantCommandHandler = (details: {
+  command: string;
+  transcript: string;
+  assistant: SpeechAssistant;
+}) =>
+  | string
+  | SpeechAssistantCommandResult
+  | null
+  | void
+  | Promise<string | SpeechAssistantCommandResult | null | void>;
+
 export interface SpeechAssistantOptions {
   /** URL that receives { message } and returns { reply }.
    *  Omit to use the built-in demo commands. */
@@ -31,7 +48,7 @@ export interface SpeechAssistantOptions {
   /** String or function returning a string/Promise, read before every request. */
   token?: string | ((() => string | Promise<string>) | null);
   /** Fully custom async handler. Overrides endpoint. */
-  onCommand?: (({ command: string, transcript: string, assistant: SpeechAssistant }) => string | Promise<string>) | null;
+  onCommand?: SpeechAssistantCommandHandler | null;
   /** BCP-47 language tag for recognition and speech. */
   lang?: string;
   /** Keep recognition open; the library restarts it anyway. */

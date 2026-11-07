@@ -334,68 +334,43 @@ your server.
 - Anyone within earshot can issue commands. Add a confirmation step for
   destructive actions.
 
-## Demo page
+## Integration example
 
-`index.html` is markup only — no inline styles or scripts. Three files drive it:
+`index.html` is a working browser integration. It wires the buttons and text
+form, defines its own `onCommand` routes, then maps emitted intents to demo
+actions. In your project, define what each app command does in `onCommand` and
+replace the demo `commandActions` in `index.html` with calls to your own
+navigation, data, or feature functions. If neither `endpoint` nor `onCommand`
+is configured, the library instead uses its built-in demo command routes.
 
-| File | Purpose |
-|---|---|
-| `config.js` | everything a company changes: branding, welcome text, labels, suggestions, demo replies, theme, messages, endpoint |
-| `app.js` | reads the config, applies it to the page, wires the controls |
-| `styles.css` | layout and theme, driven by CSS variables |
-
-```html
-<link rel="stylesheet" href="styles.css">
-...
-<script src="config.js"></script>
-<script src="speech-assistant.js"></script>
-<script src="app.js"></script>
-```
-
-Re-branding is a config edit — no changes to `app.js` or the library:
+The essential integration pattern is:
 
 ```js
-// config.js
-window.VOICE_ASSISTANT_CONFIG = {
-    title: "Acme Voice Help",
-    description: "Ask about orders, billing or support.",
-    welcomeMessage: "Welcome to Acme. How can I help?",
-    endpoint: "/api/assistant",
-    texts: { youSaid: "You asked", assistant: "Acme", send: "Ask" },
-    suggestions: ["Check my order", "Talk to support"],
-    theme: { accent: "#f59e0b", primary: "#0ea5e9" }
-};
-```
-
-Everything stays adjustable at runtime too:
-
-```js
-window.voiceAssistant.configure({
-    title: "Acme Billing",
-    welcomeMessage: "Welcome to Acme billing.",
-    theme: { accent: "#f59e0b" }
+const assistant = new SpeechAssistant({
+    onCommand: async ({ command, transcript }) => {
+        if (command.includes("dashboard")) {
+            return { reply: "Opening the dashboard.", intent: "dashboard" };
+        }
+        return { reply: `I heard: ${transcript}` };
+    }
 });
 
-window.voiceAssistant.setAuthToken(token);   // after login
-window.voiceAssistant.getConfig();           // current page config
-window.voiceAssistant.assistant;             // full library API
+assistant.on("intent", ({ intent }) => {
+    if (intent === "dashboard") {
+        app.navigateToDashboard(); // your app owns the action
+    }
+});
+
+micButton.addEventListener("click", () => assistant.start());
+textForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    assistant.sendText(textInput.value);
+});
 ```
 
-The page includes a text box wired to `sendText()`, so it stays usable when
-recognition is unavailable. The first mic click plays `welcomeMessage`, then
-starts listening; later clicks just resume. With `endpoint: null` the
-`demoCommands` in `config.js` answer locally, so the page runs with no backend.
-Auth is required automatically whenever `endpoint` is set; `requiresAuth` can
-override that. On `unauthorized` the page blocks input until a fresh token is
-set.
-
-## Built-in commands
-
-`handleCommand()` is used only when both `endpoint` and `onCommand` are absent:
-dashboard, customers, inventory, sales report, help, hello, thanks, goodbye.
-They emit `intent` events that you can wire to navigation.
-
-The demo page does not rely on those hardcoded routes. Its keyword replies live
-in `config.js` under `demoCommands`, are returned through `onCommand` as
-`{ reply, intent }`, and can be changed or translated per company.
+Only return intents your integration explicitly handles. Do not execute
+arbitrary command text as code, and authorize sensitive actions on your server.
+Call `start()` from a user click so the browser can request microphone access.
+The demo also includes a welcome button and a text input for browsers without
+speech recognition.
 # speech-recognition
