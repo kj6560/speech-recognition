@@ -4,83 +4,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Voice Assistant</title>
+    <title>Voice Assistant</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
 
     <main class="assistant">
-
-        <h1 id="appTitle">👋 Welcome to AI Assistant</h1>
-
-        <p class="description" id="appDescription">
-            Talk to me naturally, or type below. I can help you navigate the
-            site, find customers, check inventory, view sales reports and answer
-            your questions.
-        </p>
-
+        <h1>Voice assistant</h1>
         <p class="status" id="status" role="status" aria-live="polite">
-            Preparing your voice assistant…
+            Ready
         </p>
 
-        <button class="mic" id="micButton" type="button" aria-label="Start listening">
-            🎤
-        </button>
-
-        <button class="start" id="startButton" type="button">
-            🔊 Start Voice Assistant
-        </button>
+        <div class="controls">
+            <button class="mic" id="micButton" type="button" aria-label="Start listening">
+                🎙
+            </button>
+            <button class="stop" id="stopButton" type="button">Stop</button>
+        </div>
 
         <form class="text-form" id="textForm" autocomplete="off">
-            <label class="visually-hidden" for="textInput">Type a message</label>
-            <input id="textInput" name="message" type="text" placeholder="Or type your question…">
+            <label class="visually-hidden" for="textInput">Type a command</label>
+            <input id="textInput" name="message" type="text" placeholder="Type a command">
             <button id="sendButton" type="submit">Send</button>
         </form>
 
         <section class="transcript" aria-live="polite">
-
-            <div class="label" id="youSaidLabel">You said</div>
-            <p id="userText">Waiting for your voice…</p>
-
-            <div class="label" id="assistantLabel">Assistant</div>
-            <p id="assistantText">Welcome! I am ready to help you.</p>
-
+            <p id="userText"></p>
+            <p id="assistantText"></p>
+            <p id="actionResult"></p>
         </section>
-
-        <section class="transcript" aria-live="polite">
-            <div class="label">Executed action</div>
-            <p id="actionResult">Try a command to see the action run here.</p>
-        </section>
-
-        <div class="commands" id="commands">
-
-            <span class="label" id="trySayingLabel">Try saying</span>
-
-            <ul id="commandList">
-                <li>Open dashboard</li>
-                <li>Show customers</li>
-                <li>Show inventory</li>
-                <li>Show sales report</li>
-                <li>What can you do?</li>
-                <li>Goodbye</li>
-            </ul>
-
-        </div>
-
-        <button class="stop" id="stopButton" type="button">
-            End Conversation
-        </button>
-
     </main>
-
-    <div class="close-notice" id="closeNotice" role="dialog" aria-modal="true" aria-labelledby="byeTitle"
-        hidden>
-        <div class="close-notice-content">
-            <h2 id="byeTitle">Goodbye!</h2>
-            <p id="byeText">Thank you for interacting with us. Have a great day!</p>
-        </div>
-    </div>
 
     <script src="speech-assistant.js"></script>
 
@@ -124,7 +78,7 @@
                 const route = commandRoutes.find(({ keywords }) =>
                     keywords.some((keyword) => command.includes(keyword))
                 );
-
+                console.log(command);
                 if (!route) {
                     return {
                         reply: `I heard "${command}", but I do not have an action for it yet.`
@@ -132,50 +86,6 @@
                 }
 
                 return { reply: route.reply, intent: route.intent };
-            },
-            config: {
-                title: "👋 Welcome to AI Assistant",
-                description:
-                    "Talk to me naturally, or type below. I can help you navigate the site, find customers, check inventory, view sales reports and answer your questions.",
-                welcomeMessage:
-                    "Hello! Welcome to our website. I am your personal voice assistant. What would you like me to do for you today?",
-                texts: {
-                    youSaid: "You said",
-                    assistant: "Assistant",
-                    trySaying: "Try saying",
-                    placeholder: "Or type your question…",
-                    send: "Send",
-                    start: "🔊 Start Voice Assistant",
-                    stop: "End Conversation",
-                    micLabel: "Start listening",
-                    byeTitle: "Goodbye!",
-                    byeText: "Thank you for interacting with us. Have a great day!"
-                },
-                suggestions: [
-                    "Open dashboard",
-                    "Show customers",
-                    "Show inventory",
-                    "Show sales report",
-                    "What can you do?",
-                    "Goodbye"
-                ],
-                theme: {
-                    bg: "#101827",
-                    panel: "#1c293b",
-                    "panel-dark": "#101827",
-                    text: "#ffffff",
-                    muted: "#bdc9d9",
-                    accent: "#4ade80",
-                    mic: "#16a34a",
-                    listening: "#dc2626",
-                    primary: "#2563eb",
-                    neutral: "#475569",
-                    border: "#2f415c",
-                    placeholder: "#7c8aa0",
-                    chip: "#ffffff0d",
-                    shadow: "#0005"
-                },
-                messages: {}
             }
         });
 
@@ -184,7 +94,6 @@
         const assistantText = document.getElementById("assistantText");
         const actionResult = document.getElementById("actionResult");
         const micButton = document.getElementById("micButton");
-        const startButton = document.getElementById("startButton");
         const stopButton = document.getElementById("stopButton");
         const textForm = document.getElementById("textForm");
         const textInput = document.getElementById("textInput");
@@ -217,10 +126,10 @@
         });
 
         micButton.addEventListener("click", () => assistant.start());
-        startButton.addEventListener("click", () =>
-            assistant.welcome(assistant.getOptions().config.welcomeMessage)
-        );
         stopButton.addEventListener("click", () => assistant.stop());
+        assistant.on("state", ({ listening }) => {
+            micButton.classList.toggle("listening", listening);
+        });
         textForm.addEventListener("submit", (event) => {
             event.preventDefault();
             const message = textInput.value.trim();
